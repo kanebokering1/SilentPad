@@ -1,0 +1,684 @@
+package com.example.hronline
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material3.*
+import androidx.compose.ui.window.Dialog
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.hronline.data.models.User
+import com.example.hronline.data.repositories.AuthRepository
+import com.example.hronline.ui.theme.SplashTheme
+import com.example.hronline.utils.UserSession
+import kotlinx.coroutines.launch
+
+class LoginActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            SplashTheme {
+                LoginScreen()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginScreen() {
+    val context = LocalContext.current
+    var emailOrNik by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showRegisterDialog by remember { mutableStateOf(false) }
+    var showForgotPasswordDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    
+    // Warna Tema
+    val primaryColor = Color(0xFFFF6568)
+    
+    fun handleLogin() {
+        if (emailOrNik.isBlank() || password.isBlank()) {
+            errorMessage = "Email/NIK dan password harus diisi"
+            return
+        }
+        
+        isLoading = true
+        errorMessage = null
+        
+        scope.launch {
+            try {
+                // Try login by email first, then by NIK
+                val loginResult = if (emailOrNik.contains("@")) {
+                    AuthRepository.login(emailOrNik.trim(), password)
+                } else {
+                    AuthRepository.loginByNik(emailOrNik.trim(), password)
+                }
+                
+                if (loginResult.isSuccess) {
+                    val user = loginResult.getOrNull()
+                    if (user != null) {
+                        // Save user session
+                        UserSession.saveSession(context, user)
+                        
+                        // Navigate to HomeActivity
+                        val intent = Intent(context, HomeActivity::class.java)
+                        context.startActivity(intent)
+                        (context as? ComponentActivity)?.finish()
+                    } else {
+                        errorMessage = "Login gagal. Coba lagi."
+                        isLoading = false
+                    }
+                } else {
+                    val exception = loginResult.exceptionOrNull()
+                    errorMessage = exception?.message ?: "Login gagal. Coba lagi."
+                    isLoading = false
+                }
+            } catch (e: Exception) {
+                errorMessage = "Terjadi kesalahan. Pastikan koneksi internet tersedia."
+                isLoading = false
+            }
+        }
+    }
+
+    Scaffold(
+        containerColor = Color.White
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Logo
+            Image(
+                painter = painterResource(id = R.drawable.ic_app_logo),
+                contentDescription = "Logo",
+                modifier = Modifier.size(100.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text(
+                text = "Selamat Datang Kembali",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            
+            Text(
+                text = "Silakan masuk untuk melanjutkan",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Email/NIK Field
+            OutlinedTextField(
+                value = emailOrNik,
+                onValueChange = { 
+                    emailOrNik = it
+                    errorMessage = null // Clear error when typing
+                },
+                label = { Text("Email / NIK") },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                enabled = !isLoading,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = primaryColor,
+                    focusedLabelColor = primaryColor
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Password Field
+            OutlinedTextField(
+                value = password,
+                onValueChange = { 
+                    password = it
+                    errorMessage = null // Clear error when typing
+                },
+                label = { Text("Kata Sandi") },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                enabled = !isLoading,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = primaryColor,
+                    focusedLabelColor = primaryColor
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Error Message
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage!!,
+                    color = Color(0xFFF44336),
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // Lupa Password
+            Text(
+                text = "Lupa Kata Sandi?",
+                color = primaryColor,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .clickable { showForgotPasswordDialog = true }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Register Link
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Belum punya akun? ",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "Daftar",
+                    fontSize = 14.sp,
+                    color = primaryColor,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { showRegisterDialog = true }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Tombol Login
+            Button(
+                onClick = { handleLogin() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Memproses...", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                } else {
+                    Text(
+                        text = "MASUK",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+        
+        // Register Dialog
+        if (showRegisterDialog) {
+            RegisterDialog(
+                onDismiss = { showRegisterDialog = false },
+                onRegisterSuccess = {
+                    showRegisterDialog = false
+                    // Optionally auto-fill email field
+                    emailOrNik = it.email
+                },
+                primaryColor = primaryColor
+            )
+        }
+        
+        // Forgot Password Dialog
+        if (showForgotPasswordDialog) {
+            ForgotPasswordDialog(
+                onDismiss = { showForgotPasswordDialog = false },
+                primaryColor = primaryColor
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegisterDialog(
+    onDismiss: () -> Unit,
+    onRegisterSuccess: (User) -> Unit,
+    primaryColor: Color
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    
+    var namaLengkap by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var nikKaryawan by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Title
+                Text(
+                    text = "Daftar Akun Baru",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                
+                // Nama Lengkap
+                OutlinedTextField(
+                    value = namaLengkap,
+                    onValueChange = { 
+                        namaLengkap = it
+                        errorMessage = null
+                    },
+                    label = { Text("Nama Lengkap") },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryColor,
+                        focusedLabelColor = primaryColor
+                    )
+                )
+                
+                // Email
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { 
+                        email = it
+                        errorMessage = null
+                    },
+                    label = { Text("Email") },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryColor,
+                        focusedLabelColor = primaryColor
+                    )
+                )
+                
+                // NIK Karyawan
+                OutlinedTextField(
+                    value = nikKaryawan,
+                    onValueChange = { 
+                        nikKaryawan = it
+                        errorMessage = null
+                    },
+                    label = { Text("NIK Karyawan") },
+                    leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryColor,
+                        focusedLabelColor = primaryColor
+                    )
+                )
+                
+                // Password
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { 
+                        password = it
+                        errorMessage = null
+                    },
+                    label = { Text("Password") },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryColor,
+                        focusedLabelColor = primaryColor
+                    )
+                )
+                
+                // Confirm Password
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { 
+                        confirmPassword = it
+                        errorMessage = null
+                    },
+                    label = { Text("Konfirmasi Password") },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryColor,
+                        focusedLabelColor = primaryColor
+                    )
+                )
+                
+                // Error Message
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color(0xFFF44336),
+                        fontSize = 12.sp
+                    )
+                }
+                
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Cancel Button
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        enabled = !isLoading,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.Gray
+                        )
+                    ) {
+                        Text("Batal", fontWeight = FontWeight.Bold)
+                    }
+                    
+                    // Register Button
+                    Button(
+                        onClick = {
+                            // Validation
+                            val validationError = when {
+                                namaLengkap.isBlank() || email.isBlank() || nikKaryawan.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
+                                    "Semua field harus diisi"
+                                }
+                                !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                                    "Format email tidak valid"
+                                }
+                                password != confirmPassword -> {
+                                    "Password dan konfirmasi password tidak sesuai"
+                                }
+                                password.length < 6 -> {
+                                    "Password minimal 6 karakter"
+                                }
+                                else -> null
+                            }
+                            
+                            if (validationError != null) {
+                                errorMessage = validationError
+                                return@Button
+                            }
+                            
+                            isLoading = true
+                            errorMessage = null
+                            
+                            scope.launch {
+                                try {
+                                    val newUser = User(
+                                        userId = "", // Will be generated
+                                        nikKaryawan = nikKaryawan.trim(),
+                                        email = email.trim(),
+                                        password = password,
+                                        namaLengkap = namaLengkap.trim(),
+                                        role = "employee",
+                                        isActive = true
+                                    )
+                                    
+                                    val registerResult = AuthRepository.registerUser(newUser)
+                                    if (registerResult.isSuccess) {
+                                        // Get the created user to return
+                                        val userId = registerResult.getOrNull() ?: ""
+                                        val getUserResult = AuthRepository.getUserById(userId)
+                                        if (getUserResult.isSuccess) {
+                                            val user = getUserResult.getOrNull()
+                                            if (user != null) {
+                                                onRegisterSuccess(user)
+                                            } else {
+                                                onDismiss()
+                                            }
+                                        } else {
+                                            onDismiss()
+                                        }
+                                    } else {
+                                        val exception = registerResult.exceptionOrNull()
+                                        errorMessage = exception?.message ?: "Gagal mendaftar. Coba lagi."
+                                        isLoading = false
+                                    }
+                                } catch (e: Exception) {
+                                    errorMessage = "Terjadi kesalahan. Pastikan koneksi internet tersedia."
+                                    isLoading = false
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        enabled = !isLoading,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Daftar", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ForgotPasswordDialog(
+    onDismiss: () -> Unit,
+    primaryColor: Color
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var email by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var successMessage by remember { mutableStateOf<String?>(null) }
+    
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Title
+                Text(
+                    text = "Lupa Kata Sandi",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                
+                Text(
+                    text = "Masukkan email Anda untuk menerima link reset kata sandi",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                
+                // Email Field
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { 
+                        email = it
+                        errorMessage = null
+                        successMessage = null
+                    },
+                    label = { Text("Email") },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryColor,
+                        focusedLabelColor = primaryColor
+                    )
+                )
+                
+                // Error Message
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color(0xFFF44336),
+                        fontSize = 12.sp
+                    )
+                }
+                
+                // Success Message
+                if (successMessage != null) {
+                    Text(
+                        text = successMessage!!,
+                        color = Color(0xFF4CAF50),
+                        fontSize = 12.sp
+                    )
+                }
+                
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Cancel Button
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        enabled = !isLoading,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.Gray
+                        )
+                    ) {
+                        Text("Batal", fontWeight = FontWeight.Bold)
+                    }
+                    
+                    // Send Button
+                    Button(
+                        onClick = {
+                            if (email.isBlank()) {
+                                errorMessage = "Email harus diisi"
+                                return@Button
+                            }
+                            
+                            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                                errorMessage = "Format email tidak valid"
+                                return@Button
+                            }
+                            
+                            isLoading = true
+                            errorMessage = null
+                            successMessage = null
+                            
+                            scope.launch {
+                                try {
+                                    val result = AuthRepository.sendPasswordResetEmail(email.trim())
+                                    if (result.isSuccess) {
+                                        successMessage = "Email reset kata sandi telah dikirim ke $email"
+                                        email = ""
+                                        // Auto close after 2 seconds
+                                        kotlinx.coroutines.delay(2000)
+                                        onDismiss()
+                                    } else {
+                                        val exception = result.exceptionOrNull()
+                                        errorMessage = exception?.message ?: "Gagal mengirim email. Coba lagi."
+                                        isLoading = false
+                                    }
+                                } catch (e: Exception) {
+                                    errorMessage = "Terjadi kesalahan. Pastikan koneksi internet tersedia."
+                                    isLoading = false
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        enabled = !isLoading,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Kirim", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginPreview() {
+    SplashTheme {
+        LoginScreen()
+    }
+}
