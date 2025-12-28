@@ -132,3 +132,4 @@ app/src/main/java/com/example/silentpad/
 - Semua data notes disimpan secara lokal di device
 - Lokasi digunakan untuk informasi saja, tidak disimpan ke database
 
+

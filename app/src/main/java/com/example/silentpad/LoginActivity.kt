@@ -6,14 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -22,26 +18,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.silentpad.ui.theme.SilentPadTheme
-import com.example.silentpad.ui.theme.Black
-import com.example.silentpad.ui.theme.LightBlue
-import com.example.silentpad.ui.theme.White
+import com.example.silentpad.ui.theme.SilentPadColors
+import com.example.silentpad.ui.theme.SilentPadButton
+
+import com.example.silentpad.ui.theme.SocialButton
+import com.example.silentpad.ui.theme.GoogleWhite
+import com.example.silentpad.ui.theme.FacebookBlue
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             SilentPadTheme {
-                LoginScreen()
+                LoginScreen(
+                    onLoginClick = {
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                    },
+                    onSignUpClick = {
+                        startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
+                    }
+                )
             }
         }
     }
@@ -49,222 +54,176 @@ class LoginActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
-    val context = LocalContext.current
+fun LoginScreen(
+    onLoginClick: () -> Unit,
+    onSignUpClick: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background Image
-        Image(
-            painter = painterResource(id = R.drawable.wolf_647528_1920),
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-        
-        // Overlay
+        // Pure Black Background
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f))
+                .background(SilentPadColors.background)
         )
+        
+        // Wolf Moon Image - centered and properly sized
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.wolfmoon),
+                contentDescription = "Wolf Moon Background",
+                modifier = Modifier
+                    .size(400.dp)
+                    .offset(y = 80.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
         
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Welcome Text
+            Spacer(modifier = Modifier.height(400.dp))
+            
+            // WELCOME, GLAD TO SEE YOU AGAIN! Text - positioned below wolf moon
             Text(
-                text = "WELCOME, GLAD TO SEE YOU AGAIN!",
+                text = "WELCOME,\nGLAD TO SEE YOU AGAIN!",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = White,
+                fontWeight = FontWeight.Normal,
+                fontFamily = FontFamily.Serif,
+                color = SilentPadColors.textPrimary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 32.dp)
+                lineHeight = 24.sp,
+                modifier = Modifier.padding(bottom = 60.dp)
             )
             
-            // Email Field
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email Address", color = White) },
-                leadingIcon = {
-                    Icon(Icons.Default.Email, contentDescription = "Email", tint = LightBlue)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(39.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = White,
-                    unfocusedTextColor = White,
-                    focusedBorderColor = LightBlue,
-                    unfocusedBorderColor = LightBlue,
-                    focusedLabelColor = LightBlue,
-                    unfocusedLabelColor = LightBlue
-                ),
-                shape = RoundedCornerShape(8.dp),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            // Email Address Field - Large blue box like WelcomeActivity buttons
+            SilentPadButton(
+                text = "Email Address",
+                onClick = { /* Focus on email field */ },
+                width = 330.dp,
+                height = 60.dp,
+                fontSize = 16.sp
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Password Field
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password", color = White) },
-                leadingIcon = {
-                    Icon(Icons.Default.Lock, contentDescription = "Password", tint = LightBlue)
-                },
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                            tint = LightBlue
-                        )
-                    }
-                },
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(39.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = White,
-                    unfocusedTextColor = White,
-                    focusedBorderColor = LightBlue,
-                    unfocusedBorderColor = LightBlue,
-                    focusedLabelColor = LightBlue,
-                    unfocusedLabelColor = LightBlue
-                ),
-                shape = RoundedCornerShape(8.dp),
-                singleLine = true
+            // Password Field - Large blue box like WelcomeActivity buttons
+            SilentPadButton(
+                text = "Password",
+                onClick = { /* Focus on password field */ },
+                width = 330.dp,
+                height = 60.dp,
+                fontSize = 16.sp
             )
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Forgot Password
-            Text(
-                text = "Forgot Password?",
-                fontSize = 14.sp,
-                color = LightBlue,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .clickable { /* TODO: Implement forgot password */ },
-                fontWeight = FontWeight.Medium
+            // Forgot Password Link - positioned to the right
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = "Forgot Password?",
+                    fontSize = 12.sp,
+                    color = SilentPadColors.textPrimary,
+                    modifier = Modifier.clickable { /* Forgot password logic */ }
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // LOGIN Button - Large like WelcomeActivity buttons
+            SilentPadButton(
+                text = "LOGIN",
+                onClick = onLoginClick,
+                width = 330.dp,
+                height = 60.dp,
+                fontSize = 18.sp
             )
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Login Button
-            Button(
-                onClick = {
-                    // TODO: Implement login logic
-                    val intent = Intent(context, MainActivity::class.java)
-                    context.startActivity(intent)
-                },
-                modifier = Modifier
-                    .width(205.dp)
-                    .height(62.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Black
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = "LOGIN",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = White
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Divider with "Or Login With"
+            // "Or Login With" text with line separators
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = LightBlue.copy(alpha = 0.5f)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(SilentPadColors.textPrimary)
                 )
                 Text(
                     text = "Or Login With",
-                    color = LightBlue,
                     fontSize = 14.sp,
+                    color = SilentPadColors.textPrimary,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = LightBlue.copy(alpha = 0.5f)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(SilentPadColors.textPrimary)
                 )
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
-            // Social Login Buttons
+            // Social Login Buttons Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Google Button (placeholder)
-                Box(
-                    modifier = Modifier
-                        .size(41.dp)
-                        .background(White, shape = RoundedCornerShape(20.5.dp))
-                        .clickable { /* TODO: Google login */ },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("G", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Black)
-                }
-                
-                Spacer(modifier = Modifier.width(16.dp))
-                
-                // Facebook Button (placeholder)
-                Box(
-                    modifier = Modifier
-                        .size(49.dp)
-                        .background(White, shape = RoundedCornerShape(24.5.dp))
-                        .clickable { /* TODO: Facebook login */ },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("f", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Black)
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Sign Up Link
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Don't have Account? ",
-                    fontSize = 14.sp,
-                    color = White
+                // Google Button - Square with proper Google logo styling
+                SocialButton(
+                    text = "G",
+                    onClick = { /* Google login */ },
+                    size = 50.dp,
+                    backgroundColor = GoogleWhite,
+                    textColor = SilentPadColors.inputBackground,
+                    fontSize = 20.sp
                 )
-                Text(
-                    text = "Sign Up Now",
-                    fontSize = 14.sp,
-                    color = LightBlue,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        val intent = Intent(context, RegisterActivity::class.java)
-                        context.startActivity(intent)
-                    }
+                
+                Spacer(modifier = Modifier.width(24.dp))
+                
+                // Facebook Button - Square with proper Facebook styling
+                SocialButton(
+                    text = "f",
+                    onClick = { /* Facebook login */ },
+                    size = 50.dp,
+                    backgroundColor = FacebookBlue,
+                    textColor = SilentPadColors.textPrimary,
+                    fontSize = 24.sp
                 )
             }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Don't have Account? Sign Up Now
+            Text(
+                text = "Don't have Account? Sign Up Now",
+                fontSize = 14.sp,
+                color = SilentPadColors.textSecondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.clickable { onSignUpClick() }
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }

@@ -1,3 +1,51 @@
 <resources>
+    <!-- App Name -->
     <string name="app_name">Silent Pad</string>
+    
+    <!-- Welcome Screen -->
+    <string name="welcome_title">SilentPad</string>
+    <string name="location_text">Lokasi: %s</string>
+    <string name="login_button">LOGIN</string>
+    <string name="signup_button">Sign Up</string>
+    
+    <!-- Authentication -->
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="confirm_password_hint">Konfirmasi Password</string>
+    <string name="name_hint">Nama Lengkap</string>
+    <string name="register_title">DAFTAR</string>
+    <string name="login_title">LOGIN</string>
+    <string name="register_button">DAFTAR</string>
+    <string name="already_have_account">Sudah punya akun? Login</string>
+    <string name="dont_have_account">Belum punya akun? Daftar</string>
+    <string name="forgot_password">Lupa Password?</string>
+    
+    <!-- Main Activity -->
+    <string name="add_note">Tambah Catatan</string>
+    <string name="my_notes">Catatan Saya</string>
+    <string name="empty_notes">Belum ada catatan</string>
+    <string name="delete_note">Hapus Catatan</string>
+    <string name="edit_note">Edit Catatan</string>
+    <string name="note_title_hint">Judul catatan</string>
+    <string name="note_content_hint">Isi catatan</string>
+    <string name="save_note">Simpan</string>
+    <string name="cancel">Batal</string>
+    
+    <!-- General -->
+    <string name="loading">Memuat...</string>
+    <string name="error">Terjadi kesalahan</string>
+    <string name="success">Berhasil</string>
+    <string name="ok">OK</string>
+    
+    <!-- Location -->
+    <string name="finding_location">Mencari lokasi...</string>
+    <string name="location_detected">Lokasi Terdeteksi</string>
+    <string name="location_permission_required">Izin lokasi diperlukan</string>
+    
+    <!-- Content Descriptions -->
+    <string name="app_logo">Logo aplikasi</string>
+    <string name="background_image">Gambar latar belakang</string>
+    <string name="location_icon">Ikon lokasi</string>
+    <string name="add_note_icon">Ikon tambah catatan</string>
+    <string name="delete_icon">Ikon hapus</string>
 </resources>

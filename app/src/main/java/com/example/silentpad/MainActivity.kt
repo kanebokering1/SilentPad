@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
 import com.example.silentpad.data.Note
 import com.example.silentpad.data.NoteDatabase
 import com.example.silentpad.data.NoteDao
@@ -85,7 +86,7 @@ fun MainScreen(viewModel: NoteViewModel) {
                 containerColor = LightBlue,
                 contentColor = Black
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Note")
+                Icon(Icons.Filled.Add, contentDescription = "Add Note")
             }
         },
         containerColor = Black
@@ -112,7 +113,10 @@ fun MainScreen(viewModel: NoteViewModel) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(notes) { note ->
+                items(
+                    items = notes,
+                    key = { it.id }
+                ) { note ->
                     NoteItem(
                         note = note,
                         onNoteClick = {

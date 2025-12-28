@@ -16,23 +16,23 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = LightBlue,
-    secondary = DarkerBlue,
-    background = Black,
-    surface = Black,
-    onPrimary = Black,
-    onSecondary = White,
-    onBackground = White,
-    onSurface = White,
+    primary = SilentPadColors.primary,
+    secondary = SilentPadColors.secondary,
+    background = SilentPadColors.background,
+    surface = SilentPadColors.surface,
+    onPrimary = SilentPadColors.onPrimary,
+    onSecondary = SilentPadColors.onSecondary,
+    onBackground = SilentPadColors.onBackground,
+    onSurface = SilentPadColors.onSurface,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = LightBlue,
-    secondary = DarkerBlue,
+    primary = SilentPadColors.primary,
+    secondary = SilentPadColors.secondary,
     background = White,
     surface = White,
-    onPrimary = Black,
-    onSecondary = White,
+    onPrimary = SilentPadColors.onPrimary,
+    onSecondary = SilentPadColors.onSecondary,
     onBackground = Black,
     onSurface = Black,
 )
@@ -56,7 +56,6 @@ fun SilentPadTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
@@ -67,4 +66,5 @@ fun SilentPadTheme(
         content = content
     )
 }
+
 

@@ -124,6 +124,13 @@ class SplashActivity : ComponentActivity() {
 
                 @SuppressLint("MissingPermission")
                 fun startLocationProcess() {
+                    // Check permissions before making location calls
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        location = "Lokasi Tidak Dikenal"
+                        screenState = SplashScreenState.Ready
+                        return
+                    }
+                    
                     fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
                         if (loc != null) {
                             updateLocationName(loc)
@@ -137,8 +144,8 @@ class SplashActivity : ComponentActivity() {
                             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
                         }
                     }.addOnFailureListener {
-                        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000).build()
-                        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+                        location = "Lokasi Tidak Dikenal"
+                        screenState = SplashScreenState.Ready
                     }
                 }
 
@@ -317,4 +324,5 @@ fun TypingText(text: String) {
         fontWeight = FontWeight.Medium
     )
 }
+
 

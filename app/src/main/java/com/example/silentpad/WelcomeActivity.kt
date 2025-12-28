@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,12 +19,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.silentpad.ui.theme.SilentPadTheme
-import com.example.silentpad.ui.theme.Black
-import com.example.silentpad.ui.theme.LightBlue
-import com.example.silentpad.ui.theme.White
+import com.example.silentpad.ui.theme.SilentPadColors
+import com.example.silentpad.ui.theme.SilentPadButton
+import com.example.silentpad.ui.theme.SilentPadTitle
 
 class WelcomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,87 +45,63 @@ fun WelcomeScreen(location: String) {
     val context = LocalContext.current
     
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background Image - using one of the wolf images
-        Image(
-            painter = painterResource(id = R.drawable.wolf_647528_1920),
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-        
-        // Overlay untuk readability
+        // Pure Black Background
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
+                .background(SilentPadColors.background)
+        )
+        
+        // Wolf Moon Image - centered
+        Image(
+            painter = painterResource(id = R.drawable.wolfmoon),
+            contentDescription = "Background",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+                .offset(y = 80.dp),
+            contentScale = ContentScale.Fit
         )
         
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // App Name
-            Text(
+            
+            Spacer(modifier = Modifier.height(300.dp))
+            
+            // SilentPad Title - Using global theme
+            SilentPadTitle(
                 text = "SilentPad",
-                fontSize = 35.sp,
-                fontWeight = FontWeight.Bold,
-                color = White,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = 60.dp)
             )
             
-            // Location Info
-            Text(
-                text = "Lokasi: $location",
-                fontSize = 16.sp,
-                color = White,
-                modifier = Modifier.padding(bottom = 48.dp)
+            // LOGIN Button - Using global component
+            SilentPadButton(
+                text = "LOGIN",
+                onClick = {
+                    val intent = Intent(context, LoginActivity::class.java)
+                    context.startActivity(intent)
+                }
             )
             
-            // Login Button
-            Box(
-                modifier = Modifier
-                    .width(205.dp)
-                    .height(62.dp)
-                    .background(Black, shape = RoundedCornerShape(8.dp))
-                    .clickable {
-                        val intent = Intent(context, LoginActivity::class.java)
-                        context.startActivity(intent)
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "LOGIN",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = White
-                )
-            }
+            Spacer(modifier = Modifier.height(45.dp))
             
-            Spacer(modifier = Modifier.height(16.dp))
+            // Sign Up Button - Using global component
+            SilentPadButton(
+                text = "Sign Up",
+                onClick = {
+                    val intent = Intent(context, RegisterActivity::class.java)
+                    context.startActivity(intent)
+                }
+            )
             
-            // Sign Up Button
-            Box(
-                modifier = Modifier
-                    .width(205.dp)
-                    .height(62.dp)
-                    .background(Black, shape = RoundedCornerShape(8.dp))
-                    .clickable {
-                        val intent = Intent(context, RegisterActivity::class.java)
-                        context.startActivity(intent)
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Sign Up",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = White
-                )
-            }
+            Spacer(modifier = Modifier.height(60.dp))
         }
     }
 }
+
 
