@@ -9,11 +9,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,17 +22,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.silentpad.ui.theme.SilentPadTheme
 import com.example.silentpad.ui.theme.SilentPadColors
 import com.example.silentpad.ui.theme.SilentPadTitle
+
+import com.example.silentpad.ui.theme.SilentPadButton
 import com.example.silentpad.ui.theme.SilentPadInputField
-import com.example.silentpad.ui.theme.SilentPadSmallButton
 import com.example.silentpad.ui.theme.SocialButton
+import com.example.silentpad.ui.theme.BackButton
 import com.example.silentpad.ui.theme.GoogleWhite
 import com.example.silentpad.ui.theme.FacebookBlue
 
@@ -46,15 +48,16 @@ class RegisterActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen() {
     val context = LocalContext.current
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
+    
+    // State for input fields
+    var emailText by remember { mutableStateOf("") }
+    var passwordText by remember { mutableStateOf("") }
+    var confirmPasswordText by remember { mutableStateOf("") }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+    var isConfirmPasswordVisible by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Pure Black Background using theme
@@ -75,6 +78,17 @@ fun RegisterScreen() {
             contentScale = ContentScale.Fit
         )
         
+        // Back Button - Top Left Corner
+        BackButton(
+            onClick = {
+                val intent = Intent(context, WelcomeActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 24.dp, start = 8.dp)
+        )
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -82,7 +96,7 @@ fun RegisterScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(400.dp))
             
             // Create Account Title using global component
             SilentPadTitle(
@@ -101,55 +115,55 @@ fun RegisterScreen() {
                 modifier = Modifier.padding(bottom = 32.dp)
             )
             
-            // Email Field using global component
+            // Email Address Field - Input Field
             SilentPadInputField(
-                value = email,
-                onValueChange = { email = it },
+                value = emailText,
+                onValueChange = { emailText = it },
                 placeholder = "Email Address",
-                width = 163.dp,
-                height = 39.dp
+                width = 330.dp,
+                height = 60.dp
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Password Field using global component
+            // Password Field - Input Field  
             SilentPadInputField(
-                value = password,
-                onValueChange = { password = it },
+                value = passwordText,
+                onValueChange = { passwordText = it },
                 placeholder = "Password",
-                width = 110.dp,
-                height = 39.dp,
+                width = 330.dp,
+                height = 60.dp,
                 isPassword = true,
-                passwordVisible = passwordVisible,
-                onPasswordVisibilityToggle = { passwordVisible = !passwordVisible }
+                passwordVisible = isPasswordVisible,
+                onPasswordVisibilityToggle = { isPasswordVisible = !isPasswordVisible }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Confirm Password Field using global component
+            // Confirm Password Field - Input Field
             SilentPadInputField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                placeholder = "Confirm",
-                width = 143.dp,
-                height = 39.dp,
+                value = confirmPasswordText,
+                onValueChange = { confirmPasswordText = it },
+                placeholder = "Confirm Password",
+                width = 330.dp,
+                height = 60.dp,
                 isPassword = true,
-                passwordVisible = confirmPasswordVisible,
-                onPasswordVisibilityToggle = { confirmPasswordVisible = !confirmPasswordVisible }
+                passwordVisible = isConfirmPasswordVisible,
+                onPasswordVisibilityToggle = { isConfirmPasswordVisible = !isConfirmPasswordVisible }
             )
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Register Button using global component
-            SilentPadSmallButton(
+            // REGISTER Button - Large like Login button
+            SilentPadButton(
                 text = "REGISTER",
                 onClick = {
                     val intent = Intent(context, MainActivity::class.java)
                     context.startActivity(intent)
                 },
-                width = 93.dp,
-                height = 33.dp,
-                fontSize = 10.sp
+                width = 330.dp,
+                height = 60.dp,
+                fontSize = 18.sp
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -160,51 +174,42 @@ fun RegisterScreen() {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Google Button using global component
+                // Google Button - Square with proper Google logo styling
                 SocialButton(
                     text = "G",
-                    onClick = { /* Google login */ },
-                    size = 41.dp,
+                    onClick = { /* Google signup */ },
+                    size = 50.dp,
                     backgroundColor = GoogleWhite,
-                    textColor = SilentPadColors.inputBackground
+                    textColor = SilentPadColors.inputBackground,
+                    fontSize = 20.sp
                 )
                 
                 Spacer(modifier = Modifier.width(24.dp))
                 
-                // Facebook Button using global component
+                // Facebook Button - Square with proper Facebook styling
                 SocialButton(
                     text = "f",
-                    onClick = { /* Facebook login */ },
-                    size = 49.dp,
+                    onClick = { /* Facebook signup */ },
+                    size = 50.dp,
                     backgroundColor = FacebookBlue,
                     textColor = SilentPadColors.textPrimary,
                     fontSize = 24.sp
                 )
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
-            // Already have Account? Login Now Button using theme colors
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Already have an Account? Login",
-                    fontSize = 12.sp,
-                    color = SilentPadColors.textSecondary,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Now Button:",
-                    fontSize = 12.sp,
-                    color = SilentPadColors.textPrimary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.clickable {
-                        val intent = Intent(context, LoginActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                )
-            }
+            // Already have an Account? Login Now
+            Text(
+                text = "Already have an Account? Login Now",
+                fontSize = 14.sp,
+                color = SilentPadColors.textSecondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.clickable {
+                    val intent = Intent(context, LoginActivity::class.java)
+                    context.startActivity(intent)
+                }
+            )
             
             Spacer(modifier = Modifier.height(60.dp))
         }

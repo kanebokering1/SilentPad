@@ -28,6 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.silentpad.ui.theme.SilentPadTheme
 import com.example.silentpad.ui.theme.SilentPadColors
+import com.example.silentpad.ui.theme.SilentPadTitle
+import com.example.silentpad.ui.theme.SilentPadButton
+import com.example.silentpad.ui.theme.SilentPadInputField
+import com.example.silentpad.ui.theme.SocialButton
+import com.example.silentpad.ui.theme.BackButton
+import com.example.silentpad.ui.theme.GoogleWhite
+import com.example.silentpad.ui.theme.FacebookBlue
 import com.example.silentpad.ui.theme.SilentPadButton
 
 import com.example.silentpad.ui.theme.SocialButton
@@ -70,6 +77,18 @@ fun LoginScreen(
                 .background(SilentPadColors.background)
         )
         
+        // Back Button - Top Left Corner
+        val context = androidx.compose.ui.platform.LocalContext.current
+        BackButton(
+            onClick = {
+                val intent = Intent(context, WelcomeActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 24.dp, start = 8.dp)
+        )
+        
         // Wolf Moon Image - centered and properly sized
         Box(
             modifier = Modifier
@@ -108,24 +127,27 @@ fun LoginScreen(
                 modifier = Modifier.padding(bottom = 60.dp)
             )
             
-            // Email Address Field - Large blue box like WelcomeActivity buttons
-            SilentPadButton(
-                text = "Email Address",
-                onClick = { /* Focus on email field */ },
+            // Email Address Field - Input Field
+            SilentPadInputField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = "Email Address",
                 width = 330.dp,
-                height = 60.dp,
-                fontSize = 16.sp
+                height = 60.dp
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Password Field - Large blue box like WelcomeActivity buttons
-            SilentPadButton(
-                text = "Password",
-                onClick = { /* Focus on password field */ },
+            // Password Field - Input Field
+            SilentPadInputField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = "Password",
                 width = 330.dp,
                 height = 60.dp,
-                fontSize = 16.sp
+                isPassword = true,
+                passwordVisible = passwordVisible,
+                onPasswordVisibilityToggle = { passwordVisible = !passwordVisible }
             )
             
             Spacer(modifier = Modifier.height(8.dp))

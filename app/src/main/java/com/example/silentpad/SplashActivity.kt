@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.silentpad.ui.theme.SilentPadTheme
+import com.example.silentpad.ui.theme.SilentPadColors
 import com.example.silentpad.ui.theme.Black
 import com.example.silentpad.ui.theme.White
 import com.google.android.gms.common.ConnectionResult
@@ -198,7 +199,7 @@ class SplashActivity : ComponentActivity() {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun SplashScreenContent(state: SplashScreenState, location: String) {
-    Surface(modifier = Modifier.fillMaxSize(), color = Black) {
+    Surface(modifier = Modifier.fillMaxSize(), color = SilentPadColors.background) {
         Box(modifier = Modifier.fillMaxSize()) {
             AnimatedContent(
                 targetState = state,
@@ -233,38 +234,93 @@ fun SplashScreenContent(state: SplashScreenState, location: String) {
 
 @Composable
 private fun LogoStage() {
-    var visible by remember { mutableStateOf(false) }
-
+    var displayedText by remember { mutableStateOf("") }
+    var showCursor by remember { mutableStateOf(true) }
+    val fullText = "SilentPad"
+    
+    // Logo image fade-in animation
+    var imageVisible by remember { mutableStateOf(false) }
+    
+    val imageAlpha by animateFloatAsState(
+        targetValue = if (imageVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = 1200),
+        label = "image_fade"
+    )
+    
+    // Cursor blinking animation
+    val cursorAlpha by animateFloatAsState(
+        targetValue = if (showCursor) 1f else 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 500),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cursor_blink"
+    )
+    
     LaunchedEffect(Unit) {
-        visible = true
+        delay(300) // Initial delay
+        imageVisible = true
+        delay(500) // Show logo first
+        
+        // Typing animation
+        fullText.forEachIndexed { index, _ ->
+            delay(90) // Typing speed
+            displayedText = fullText.substring(0, index + 1)
+        }
+        
+        delay(600) // Show complete text
+        showCursor = false
     }
 
-    val scale by animateFloatAsState(
-        targetValue = if (visible) 1f else 0.5f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "Logo Scale"
-    )
-
-    val alpha by animateFloatAsState(
-        targetValue = if (visible) 1f else 0f,
-        animationSpec = tween(1000),
-        label = "Logo Alpha"
-    )
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "SilentPad",
-            fontSize = 35.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = White,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Wolf Moon Logo with fade-in effect
+        Image(
+            painter = painterResource(id = R.drawable.wolfmoon),
+            contentDescription = "SilentPad Logo",
             modifier = Modifier
-                .alpha(alpha)
-                .scale(scale),
-            letterSpacing = 2.sp
+                .size(200.dp)
+                .alpha(imageAlpha),
+            contentScale = androidx.compose.ui.layout.ContentScale.Fit
         )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        // Typing text effect with cursor
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = displayedText,
+                fontSize = 35.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = SilentPadColors.textPrimary,
+                letterSpacing = 2.sp
+            )
+            
+            // Blinking cursor - only show during typing
+            if (displayedText.isNotEmpty() && displayedText.length < fullText.length) {
+                Text(
+                    text = "|",
+                    fontSize = 35.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = SilentPadColors.textPrimary,
+                    modifier = Modifier.alpha(cursorAlpha)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Subtitle with typewriter effect
+        if (displayedText == fullText) {
+            TypingSubtitle(
+                text = "Your Digital Notepad",
+                delay = 500
+            )
+        }
     }
 }
 
@@ -319,9 +375,30 @@ fun TypingText(text: String) {
 
     Text(
         text = displayedText,
-        color = White,
+        color = SilentPadColors.textPrimary,
         fontSize = 16.sp,
         fontWeight = FontWeight.Medium
+    )
+}
+
+@Composable
+fun TypingSubtitle(text: String, delay: Long = 0) {
+    var displayedText by remember { mutableStateOf("") }
+    
+    LaunchedEffect(text) {
+        kotlinx.coroutines.delay(delay)
+        displayedText = ""
+        for (i in 1..text.length) {
+            displayedText = text.substring(0, i)
+            kotlinx.coroutines.delay(80) // Slightly faster for subtitle
+        }
+    }
+
+    Text(
+        text = displayedText,
+        color = SilentPadColors.textSecondary,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Light
     )
 }
 
