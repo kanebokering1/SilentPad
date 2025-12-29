@@ -20,6 +20,11 @@
     <string name="dont_have_account">Belum punya akun? Daftar</string>
     <string name="forgot_password">Lupa Password?</string>
     
+    <!-- Social Authentication -->
+    <string name="facebook_app_id">1234567890123456</string>
+    <string name="fb_login_protocol_scheme">fb1234567890123456</string>
+    <string name="facebook_client_token">abc123def456ghi789jkl012mno345pqr678</string>
+    
     <!-- Main Activity -->
     <string name="add_note">Tambah Catatan</string>
     <string name="my_notes">Catatan Saya</string>

@@ -10,11 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,28 +18,29 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.silentpad.ui.theme.SilentPadTheme
 import com.example.silentpad.ui.theme.SilentPadColors
 import com.example.silentpad.ui.theme.SilentPadTitle
-
 import com.example.silentpad.ui.theme.SilentPadButton
 import com.example.silentpad.ui.theme.SilentPadInputField
-import com.example.silentpad.ui.theme.SocialButton
 import com.example.silentpad.ui.theme.BackButton
-import com.example.silentpad.ui.theme.GoogleWhite
-import com.example.silentpad.ui.theme.FacebookBlue
+import com.example.silentpad.auth.SimpleAuthManager
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            SilentPadTheme {
-                RegisterScreen()
+        try {
+            setContent {
+                SilentPadTheme {
+                    RegisterScreen()
+                }
             }
+        } catch (e: Exception) {
+            android.util.Log.e("RegisterActivity", "Error in onCreate", e)
+            finish()
         }
     }
 }
@@ -51,8 +48,8 @@ class RegisterActivity : ComponentActivity() {
 @Composable
 fun RegisterScreen() {
     val context = LocalContext.current
+    val authManager = remember { SimpleAuthManager(context) }
     
-    // State for input fields
     var emailText by remember { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
     var confirmPasswordText by remember { mutableStateOf("") }
@@ -81,8 +78,12 @@ fun RegisterScreen() {
         // Back Button - Top Left Corner
         BackButton(
             onClick = {
-                val intent = Intent(context, WelcomeActivity::class.java)
-                context.startActivity(intent)
+                try {
+                    val intent = Intent(context, WelcomeActivity::class.java)
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    android.util.Log.e("RegisterActivity", "Back navigation error", e)
+                }
             },
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -156,48 +157,46 @@ fun RegisterScreen() {
             
             // REGISTER Button - Large like Login button
             SilentPadButton(
-                text = "REGISTER",
+                text = if (authManager.isLoading.value) "Creating Account..." else "REGISTER",
                 onClick = {
-                    val intent = Intent(context, MainActivity::class.java)
-                    context.startActivity(intent)
+                    authManager.clearError()
+                    if (emailText.isNotBlank() && passwordText.isNotBlank() && passwordText == confirmPasswordText) {
+                        authManager.createUserWithEmailPassword(emailText, passwordText) { success, error ->
+                            if (success) {
+                                try {
+                                    val intent = Intent(context, MainActivity::class.java)
+                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    android.util.Log.e("RegisterActivity", "Navigation error", e)
+                                    authManager.authError.value = "Navigation failed"
+                                }
+                            }
+                        }
+                    } else if (passwordText != confirmPasswordText) {
+                        authManager.authError.value = "Passwords do not match"
+                    } else {
+                        authManager.authError.value = "Please fill in all fields"
+                    }
                 },
                 width = 330.dp,
                 height = 60.dp,
                 fontSize = 18.sp
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Social Login Buttons Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Google Button - Square with proper Google logo styling
-                SocialButton(
-                    text = "G",
-                    onClick = { /* Google signup */ },
-                    size = 50.dp,
-                    backgroundColor = GoogleWhite,
-                    textColor = SilentPadColors.inputBackground,
-                    fontSize = 20.sp
-                )
-                
-                Spacer(modifier = Modifier.width(24.dp))
-                
-                // Facebook Button - Square with proper Facebook styling
-                SocialButton(
-                    text = "f",
-                    onClick = { /* Facebook signup */ },
-                    size = 50.dp,
-                    backgroundColor = FacebookBlue,
-                    textColor = SilentPadColors.textPrimary,
-                    fontSize = 24.sp
-                )
-            }
-            
             Spacer(modifier = Modifier.height(24.dp))
+            
+            // Show error message if exists
+            authManager.authError.value?.let { error ->
+                Text(
+                    text = error,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             
             // Already have an Account? Login Now
             Text(
@@ -206,8 +205,12 @@ fun RegisterScreen() {
                 color = SilentPadColors.textSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.clickable {
-                    val intent = Intent(context, LoginActivity::class.java)
-                    context.startActivity(intent)
+                    try {
+                        val intent = Intent(context, LoginActivity::class.java)
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        android.util.Log.e("RegisterActivity", "Login navigation error", e)
+                    }
                 }
             )
             
@@ -215,4 +218,3 @@ fun RegisterScreen() {
         }
     }
 }
-

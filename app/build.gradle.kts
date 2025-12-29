@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.compose.compiler)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -84,6 +85,14 @@ dependencies {
     
     // Location Services
     implementation(libs.play.services.location)
+    
+    // Firebase Auth & Google Sign-In
+    implementation("com.google.firebase:firebase-auth:22.3.0")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.firebase:firebase-bom:32.6.0")
+    
+    // Facebook Login
+    implementation("com.facebook.android:facebook-login:16.2.0")
     
     // Testing
     testImplementation(libs.junit)

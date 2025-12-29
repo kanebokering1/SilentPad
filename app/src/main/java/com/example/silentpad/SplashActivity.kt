@@ -264,11 +264,11 @@ private fun LogoStage() {
         
         // Typing animation
         fullText.forEachIndexed { index, _ ->
-            delay(90) // Typing speed
+            delay(70) // Typing speed
             displayedText = fullText.substring(0, index + 1)
         }
         
-        delay(600) // Show complete text
+        delay(800) // Show complete text
         showCursor = false
     }
 
@@ -281,7 +281,7 @@ private fun LogoStage() {
             painter = painterResource(id = R.drawable.wolfmoon),
             contentDescription = "SilentPad Logo",
             modifier = Modifier
-                .size(200.dp)
+                .size(400.dp)
                 .alpha(imageAlpha),
             contentScale = androidx.compose.ui.layout.ContentScale.Fit
         )
@@ -318,7 +318,7 @@ private fun LogoStage() {
         if (displayedText == fullText) {
             TypingSubtitle(
                 text = "Your Digital Notepad",
-                delay = 500
+                delay = 800
             )
         }
     }

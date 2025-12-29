@@ -1,10 +1,12 @@
 package com.example.silentpad.ui.theme
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
@@ -100,13 +102,14 @@ fun SilentPadTitle(
 // Social Login Button
 @Composable
 fun SocialButton(
-    text: String,
+    text: String = "",
     onClick: () -> Unit,
     size: Dp,
     backgroundColor: Color,
     textColor: Color,
     fontSize: TextUnit = 18.sp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    iconRes: Int? = null
 ) {
     Box(
         modifier = modifier
@@ -123,12 +126,20 @@ fun SocialButton(
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = text,
-            fontSize = fontSize,
-            fontWeight = FontWeight.Bold,
-            color = textColor
-        )
+        if (iconRes != null) {
+            Image(
+                painter = painterResource(id = iconRes),
+                contentDescription = text,
+                modifier = Modifier.size((size * 0.6f))
+            )
+        } else {
+            Text(
+                text = text,
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+        }
     }
 }
 

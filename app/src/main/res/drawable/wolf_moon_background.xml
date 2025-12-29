@@ -1,0 +1,46 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Blue Moon Background -->
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="#4A90E2"/>
+            <size android:width="180dp" android:height="180dp"/>
+        </shape>
+    </item>
+    
+    <!-- Moon Surface Details -->
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="#3A7BD5"/>
+            <size android:width="170dp" android:height="170dp"/>
+        </shape>
+    </item>
+    
+    <!-- Wolf Silhouette Overlay -->
+    <item android:gravity="center">
+        <vector android:width="180dp"
+            android:height="180dp"
+            android:viewportWidth="180"
+            android:viewportHeight="180">
+            
+            <!-- Wolf silhouette path -->
+            <path android:fillColor="#000000"
+                android:pathData="M50,130L55,125L60,120L70,115L75,110L80,105L85,100L90,95L95,90L100,85L105,80L110,75L115,70L120,65L125,60L130,55L125,50L120,45L115,40L110,35L105,30L100,25L95,20L90,25L85,30L80,35L75,40L70,45L65,50L60,55L55,60L50,65L45,70L40,75L35,80L30,85L25,90L20,95L25,100L30,105L35,110L40,115L45,120L50,125L50,130Z"/>
+            
+            <!-- Ground/Rock silhouette -->
+            <path android:fillColor="#000000"
+                android:pathData="M10,140L20,135L30,130L40,135L50,140L60,145L70,150L80,155L90,160L100,155L110,150L120,145L130,140L140,135L150,130L160,135L170,140L180,145L180,180L10,180L10,140Z"/>
+            
+            <!-- Tree silhouettes -->
+            <path android:fillColor="#000000"
+                android:pathData="M15,80L20,75L25,70L30,65L35,60L40,65L45,70L50,75L55,80L50,140L45,140L40,140L35,140L30,140L25,140L20,140L15,140L15,80Z"/>
+                
+            <!-- Birds in sky -->
+            <path android:fillColor="#000000"
+                android:pathData="M100,30L105,32L110,30L105,28L100,30Z"/>
+            <path android:fillColor="#000000"
+                android:pathData="M120,25L125,27L130,25L125,23L120,25Z"/>
+            <path android:fillColor="#000000"
+                android:pathData="M80,35L85,37L90,35L85,33L80,35Z"/>
+        </vector>
+    </item>
+</layer-list>
