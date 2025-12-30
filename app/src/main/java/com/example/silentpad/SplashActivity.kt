@@ -272,57 +272,53 @@ private fun LogoStage() {
         showCursor = false
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Wolf Moon Logo with fade-in effect
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Wolf Moon Logo positioned same as WelcomeActivity
         Image(
             painter = painterResource(id = R.drawable.wolfmoon),
             contentDescription = "SilentPad Logo",
             modifier = Modifier
-                .size(400.dp)
+                .fillMaxWidth()
+                .height(400.dp)
+                .offset(y = 80.dp)
                 .alpha(imageAlpha),
             contentScale = androidx.compose.ui.layout.ContentScale.Fit
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Typing text effect with cursor
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+        // Text centered in screen
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = 100.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = displayedText,
-                fontSize = 35.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = SilentPadColors.textPrimary,
-                letterSpacing = 2.sp
-            )
-            
-            // Blinking cursor - only show during typing
-            if (displayedText.isNotEmpty() && displayedText.length < fullText.length) {
+            // Typing text effect with cursor
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "|",
-                    fontSize = 35.sp,
-                    fontWeight = FontWeight.Normal,
+                    text = displayedText,
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.ExtraBold,
                     color = SilentPadColors.textPrimary,
-                    modifier = Modifier.alpha(cursorAlpha)
+                    letterSpacing = 2.sp
                 )
+                
+                // Blinking cursor - only show during typing
+                if (displayedText.isNotEmpty() && displayedText.length < fullText.length) {
+                    Text(
+                        text = "|",
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = SilentPadColors.textPrimary,
+                        modifier = Modifier.alpha(cursorAlpha)
+                    )
+                }
             }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Subtitle with typewriter effect
-        if (displayedText == fullText) {
-            TypingSubtitle(
-                text = "Your Digital Notepad",
-                delay = 800
-            )
         }
     }
 }
+
 
 @Composable
 private fun FindingLocationStage() {
