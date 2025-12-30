@@ -94,6 +94,9 @@ dependencies {
     // Facebook Login
     implementation("com.facebook.android:facebook-login:16.2.0")
     
+    // Gson for JSON serialization
+    implementation("com.google.code.gson:gson:2.10.1")
+    
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

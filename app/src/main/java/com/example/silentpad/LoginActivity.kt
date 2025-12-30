@@ -148,6 +148,10 @@ fun LoginScreen() {
                         authManager.signInWithEmailPassword(email, password) { success, error ->
                             if (success) {
                                 try {
+                                    // Save email to SharedPreferences for profile
+                                    val prefs = context.getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
+                                    prefs.edit().putString("registered_email", email).apply()
+                                    
                                     val intent = Intent(context, MainActivity::class.java)
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     context.startActivity(intent)

@@ -50,6 +50,8 @@ fun RegisterScreen() {
     val context = LocalContext.current
     val authManager = remember { SimpleAuthManager(context) }
     
+    var nameText by remember { mutableStateOf("") }
+    var phoneText by remember { mutableStateOf("") }
     var emailText by remember { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
     var confirmPasswordText by remember { mutableStateOf("") }
@@ -113,8 +115,30 @@ fun RegisterScreen() {
                 fontWeight = FontWeight.Normal,
                 color = SilentPadColors.textPrimary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = 24.dp)
             )
+            
+            // Name Field
+            SilentPadInputField(
+                value = nameText,
+                onValueChange = { nameText = it },
+                placeholder = "Full Name",
+                width = 330.dp,
+                height = 60.dp
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Phone Number Field
+            SilentPadInputField(
+                value = phoneText,
+                onValueChange = { phoneText = it },
+                placeholder = "Phone Number",
+                width = 330.dp,
+                height = 60.dp
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Email Address Field - Input Field
             SilentPadInputField(
@@ -125,7 +149,7 @@ fun RegisterScreen() {
                 height = 60.dp
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Password Field - Input Field  
             SilentPadInputField(
@@ -139,7 +163,7 @@ fun RegisterScreen() {
                 onPasswordVisibilityToggle = { isPasswordVisible = !isPasswordVisible }
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Confirm Password Field - Input Field
             SilentPadInputField(
@@ -153,30 +177,47 @@ fun RegisterScreen() {
                 onPasswordVisibilityToggle = { isConfirmPasswordVisible = !isConfirmPasswordVisible }
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             
             // REGISTER Button - Large like Login button
             SilentPadButton(
                 text = if (authManager.isLoading.value) "Creating Account..." else "REGISTER",
                 onClick = {
                     authManager.clearError()
-                    if (emailText.isNotBlank() && passwordText.isNotBlank() && passwordText == confirmPasswordText) {
-                        authManager.createUserWithEmailPassword(emailText, passwordText) { success, error ->
-                            if (success) {
-                                try {
-                                    val intent = Intent(context, MainActivity::class.java)
-                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    android.util.Log.e("RegisterActivity", "Navigation error", e)
-                                    authManager.authError.value = "Navigation failed"
+                    
+                    // Validate all fields
+                    when {
+                        nameText.isBlank() -> authManager.authError.value = "Please enter your name"
+                        phoneText.isBlank() -> authManager.authError.value = "Please enter your phone number"
+                        emailText.isBlank() -> authManager.authError.value = "Please enter your email"
+                        passwordText.isBlank() -> authManager.authError.value = "Please enter a password"
+                        confirmPasswordText.isBlank() -> authManager.authError.value = "Please confirm your password"
+                        passwordText != confirmPasswordText -> authManager.authError.value = "Passwords do not match"
+                        passwordText.length < 6 -> authManager.authError.value = "Password must be at least 6 characters"
+                        else -> {
+                            authManager.createUserWithEmailPassword(emailText, passwordText) { success, error ->
+                                if (success) {
+                                    try {
+                                        // Save user data to SharedPreferences
+                                        val prefs = context.getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
+                                        prefs.edit().apply {
+                                            putString("registered_email", emailText)
+                                            putString("name", nameText)
+                                            putString("phone", phoneText)
+                                            putString("password", passwordText)
+                                            apply()
+                                        }
+                                        
+                                        val intent = Intent(context, MainActivity::class.java)
+                                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("RegisterActivity", "Navigation error", e)
+                                        authManager.authError.value = "Navigation failed"
+                                    }
                                 }
                             }
                         }
-                    } else if (passwordText != confirmPasswordText) {
-                        authManager.authError.value = "Passwords do not match"
-                    } else {
-                        authManager.authError.value = "Please fill in all fields"
                     }
                 },
                 width = 330.dp,
